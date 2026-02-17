@@ -1,0 +1,36 @@
+# ===========================================
+# StreamingApp Environment Configuration
+# AWS Account: 975050024946
+# Region: us-west-1
+# Created: February 2026
+# ===========================================
+
+# Common Configuration
+JWT_SECRET=streamingapp-jwt-secret-production-2026-change-me-12345
+CLIENT_URLS=http://localhost:3000
+
+# MongoDB Atlas Configuration
+MONGO_URI=mongodb+srv://dbXUser:dbXUserPassword@cluster0.fhrg87w.mongodb.net/streamingapp?retryWrites=true&w=majority
+
+# AWS Configuration
+AWS_ACCESS_KEY_ID=AKIA6GBMCU7ZFTJBEPM5
+AWS_SECRET_ACCESS_KEY= YOUR-AWS_SECRET_ACCESS_KEY
+AWS_REGION=us-west-1
+AWS_S3_BUCKET=streamingapp-videos-975050024946
+
+# ECR Configuration
+ECR_REGISTRY=975050024946.dkr.ecr.us-west-1.amazonaws.com
+
+# Service Ports
+AUTH_PORT=3001
+STREAMING_PORT=3002
+ADMIN_PORT=3003
+CHAT_PORT=3004
+
+# Service URLs (will be updated for Kubernetes)
+STREAMING_PUBLIC_URL=http://localhost:3002
+AWS_CDN_URL=
+
+# Kubernetes Configuration
+CLUSTER_NAME=streamingapp-cluster
+NAMESPACE=default

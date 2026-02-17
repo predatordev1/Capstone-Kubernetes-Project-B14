@@ -1,0 +1,94 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.services.auth.name }}
+  labels:
+    app: {{ .Values.services.auth.name }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ .Values.services.auth.name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.services.auth.name }}
+    spec:
+      containers:
+      - name: auth
+        image: "{{ .Values.global.ecrRegistry }}/{{ .Values.services.auth.image }}:{{ .Values.image.tag }}"
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        ports:
+        - containerPort: {{ .Values.services.auth.port }}
+        env:
+        - name: PORT
+          value: "{{ .Values.services.auth.port }}"
+        - name: MONGO_URI
+          valueFrom:
+            secretKeyRef:
+              name: app-secrets
+              key: mongo-uri
+        - name: JWT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: app-secrets
+              key: jwt-secret
+        - name: CLIENT_URLS
+          valueFrom:
+            configMapKeyRef:
+              name: app-config
+              key: client-urls
+        - name: AWS_ACCESS_KEY_ID
+          valueFrom:
+            secretKeyRef:
+              name: aws-secrets
+              key: access-key-id
+        - name: AWS_SECRET_ACCESS_KEY
+          valueFrom:
+            secretKeyRef:
+              name: aws-secrets
+              key: secret-access-key
+        - name: AWS_REGION
+          valueFrom:
+            configMapKeyRef:
+              name: app-config
+              key: aws-region
+        - name: AWS_S3_BUCKET
+          valueFrom:
+            configMapKeyRef:
+              name: app-config
+              key: s3-bucket
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "250m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: {{ .Values.services.auth.port }}
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: {{ .Values.services.auth.port }}
+          initialDelaySeconds: 10
+          periodSeconds: 5
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.services.auth.name }}
+  labels:
+    app: {{ .Values.services.auth.name }}
+spec:
+  type: ClusterIP
+  ports:
+  - port: {{ .Values.services.auth.port }}
+    targetPort: {{ .Values.services.auth.port }}
+    protocol: TCP
+  selector:
+    app: {{ .Values.services.auth.name }}

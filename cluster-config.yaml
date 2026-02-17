@@ -1,0 +1,39 @@
+apiVersion: eksctl.io/v1alpha5
+kind: ClusterConfig
+
+metadata:
+  name: streamingapp-cluster-pp
+  region: us-west-1
+  version: "1.29"
+
+availabilityZones:
+  - us-west-1a
+  - us-west-1c
+
+managedNodeGroups:
+  - name: streamingapp-nodes
+    instanceType: t3.medium
+    desiredCapacity: 2
+    minSize: 1
+    maxSize: 3
+    volumeSize: 20
+    volumeType: gp3
+    amiFamily: AmazonLinux2
+    labels:
+      role: worker
+    tags:
+      Project: StreamingApp_PP
+      Environment: Production
+    iam:
+      withAddonPolicies:
+        imageBuilder: true
+        ebs: true
+        albIngress: true
+        cloudWatch: true
+
+cloudWatch:
+  clusterLogging:
+    enableTypes:
+      - api
+      - audit
+      - authenticator

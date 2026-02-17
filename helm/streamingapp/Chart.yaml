@@ -1,0 +1,13 @@
+apiVersion: v2
+name: streamingapp
+description: StreamingApp MERN Stack Helm Chart
+type: application
+version: 1.0.0
+appVersion: "1.0.0"
+keywords:
+  - streaming
+  - mern
+  - microservices
+maintainers:
+  - name: Priyank Pandey
+    email: priyankpandey02@gmail.com

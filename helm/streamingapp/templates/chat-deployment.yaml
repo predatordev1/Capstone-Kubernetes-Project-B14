@@ -1,0 +1,62 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.services.chat.name }}
+  labels:
+    app: {{ .Values.services.chat.name }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ .Values.services.chat.name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.services.chat.name }}
+    spec:
+      containers:
+      - name: chat
+        image: "{{ .Values.global.ecrRegistry }}/{{ .Values.services.chat.image }}:{{ .Values.image.tag }}"
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        ports:
+        - containerPort: {{ .Values.services.chat.port }}
+        env:
+        - name: PORT
+          value: "{{ .Values.services.chat.port }}"
+        - name: MONGO_URI
+          valueFrom:
+            secretKeyRef:
+              name: app-secrets
+              key: mongo-uri
+        - name: JWT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: app-secrets
+              key: jwt-secret
+        - name: CLIENT_URLS
+          valueFrom:
+            configMapKeyRef:
+              name: app-config
+              key: client-urls
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "250m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.services.chat.name }}
+  labels:
+    app: {{ .Values.services.chat.name }}
+spec:
+  type: ClusterIP
+  ports:
+  - port: {{ .Values.services.chat.port }}
+    targetPort: {{ .Values.services.chat.port }}
+    protocol: TCP
+  selector:
+    app: {{ .Values.services.chat.name }}

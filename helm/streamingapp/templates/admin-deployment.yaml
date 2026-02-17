@@ -1,0 +1,82 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.services.admin.name }}
+  labels:
+    app: {{ .Values.services.admin.name }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ .Values.services.admin.name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.services.admin.name }}
+    spec:
+      containers:
+      - name: admin
+        image: "{{ .Values.global.ecrRegistry }}/{{ .Values.services.admin.image }}:{{ .Values.image.tag }}"
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        ports:
+        - containerPort: {{ .Values.services.admin.port }}
+        env:
+        - name: PORT
+          value: "{{ .Values.services.admin.port }}"
+        - name: MONGO_URI
+          valueFrom:
+            secretKeyRef:
+              name: app-secrets
+              key: mongo-uri
+        - name: JWT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: app-secrets
+              key: jwt-secret
+        - name: CLIENT_URLS
+          valueFrom:
+            configMapKeyRef:
+              name: app-config
+              key: client-urls
+        - name: AWS_ACCESS_KEY_ID
+          valueFrom:
+            secretKeyRef:
+              name: aws-secrets
+              key: access-key-id
+        - name: AWS_SECRET_ACCESS_KEY
+          valueFrom:
+            secretKeyRef:
+              name: aws-secrets
+              key: secret-access-key
+        - name: AWS_REGION
+          valueFrom:
+            configMapKeyRef:
+              name: app-config
+              key: aws-region
+        - name: AWS_S3_BUCKET
+          valueFrom:
+            configMapKeyRef:
+              name: app-config
+              key: s3-bucket
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "250m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.services.admin.name }}
+  labels:
+    app: {{ .Values.services.admin.name }}
+spec:
+  type: ClusterIP
+  ports:
+  - port: {{ .Values.services.admin.port }}
+    targetPort: {{ .Values.services.admin.port }}
+    protocol: TCP
+  selector:
+    app: {{ .Values.services.admin.name }}

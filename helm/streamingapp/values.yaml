@@ -1,0 +1,53 @@
+# Global configuration
+global:
+  awsRegion: us-west-1
+  awsAccountId: "975050024946"
+  ecrRegistry: 975050024946.dkr.ecr.us-west-1.amazonaws.com
+
+# Replica count for all services
+replicaCount: 2
+
+# Image configuration
+image:
+  pullPolicy: Always
+  tag: latest
+
+# MongoDB Atlas Configuration
+mongodb:
+  enabled: false  # Using MongoDB Atlas
+
+# Services Configuration
+services:
+  auth:
+    name: auth-service
+    image: streamingapp-auth
+    port: 3001
+    
+  streaming:
+    name: streaming-service
+    image: streamingapp-streaming
+    port: 3002
+    
+  admin:
+    name: admin-service
+    image: streamingapp-admin
+    port: 3003
+    
+  chat:
+    name: chat-service
+    image: streamingapp-chat
+    port: 3004
+
+# Frontend Configuration
+frontend:
+  name: frontend
+  image: streamingapp-frontend
+  port: 80
+  serviceType: LoadBalancer
+
+# AWS S3 Bucket (non-sensitive)
+aws:
+  s3Bucket: "streamingapp-videos-975050024946"
+
+# Client URLs (will be updated after Load Balancer)
+clientUrls: "http://localhost:3000"

@@ -51,3 +51,12 @@ aws:
 
 # Client URLs (will be updated after Load Balancer)
 clientUrls: "http://localhost:3000"
+
+## Deployment Notes
+## After deploying the frontend service, Kubernetes will provision an AWS LoadBalancer.
+## Run `kubectl get svc frontend` to find the EXTERNAL-IP/DNS.
+## Update `clientUrls` in `values.yaml` or override with:
+## helm upgrade --install streamingapp ./helm/streamingapp \
+##  --namespace default \
+##  --values ./helm/streamingapp/values.yaml \
+##  --set clientUrls=http://<alb-dns>

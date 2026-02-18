@@ -10,7 +10,7 @@ JWT_SECRET=streamingapp-jwt-secret-production-2026-change-me-12345
 CLIENT_URLS=http://localhost:3000
 
 # MongoDB Atlas Configuration
-MONGO_URI=mongodb+srv://dbXUser:dbXUserPassword@cluster0.fhrg87w.mongodb.net/streamingapp?retryWrites=true&w=majority
+MONGO_URI=mongodb+srv://dbUser:dbUserPassword@cluster0.fhrg87w.mongodb.net/streamingapp?retryWrites=true&w=majority
 
 # AWS Configuration
 AWS_ACCESS_KEY_ID=AKIA6GBMCU7ZFTJBEPM5

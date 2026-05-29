@@ -12,30 +12,30 @@ image:
 services:
   auth:
     name: auth-service
-    image: streamingapp-auth
+    image: streamingapp-auth-pp
     port: 3001
   streaming:
     name: streaming-service
-    image: streamingapp-streaming
+    image: streamingapp-streaming-pp
     port: 3002
   admin:
     name: admin-service
-    image: streamingapp-admin
+    image: streamingapp-admin-pp
     port: 3003
   chat:
     name: chat-service
-    image: streamingapp-chat
+    image: streamingapp-chat-pp
     port: 3004
 
 frontend:
   name: frontend
-  image: streamingapp-frontend
+  image: streamingapp-frontend-pp
   port: 80
   serviceType: ClusterIP
 
 healingController:
   name: healing-controller
-  image: streamingapp-healing-controller
+  image: streamingapp-healing-controller-pp
   restartThreshold: "3"
   cooldownSeconds: "300"
 

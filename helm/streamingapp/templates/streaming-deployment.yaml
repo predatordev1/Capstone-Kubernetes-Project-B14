@@ -62,20 +62,20 @@ spec:
           value: "http://{{ .Values.services.streaming.name }}:{{ .Values.services.streaming.port }}"
         resources:
           requests:
+            memory: "256Mi"
+            cpu: "250m"
+          limits:
             memory: "512Mi"
             cpu: "500m"
-          limits:
-            memory: "1Gi"
-            cpu: "1000m"
         livenessProbe:
           httpGet:
-            path: /
+            path: /api/health
             port: {{ .Values.services.streaming.port }}
           initialDelaySeconds: 30
           periodSeconds: 10
         readinessProbe:
           httpGet:
-            path: /
+            path: /api/health
             port: {{ .Values.services.streaming.port }}
           initialDelaySeconds: 10
           periodSeconds: 5

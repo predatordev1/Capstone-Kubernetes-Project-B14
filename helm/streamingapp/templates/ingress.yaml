@@ -1,0 +1,72 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: streamingapp-ingress
+  annotations:
+    # Tell Kubernetes which Ingress controller handles this
+    kubernetes.io/ingress.class: alb
+
+    # internet-facing = ALB is in public subnets, reachable from internet
+    # internal = ALB only reachable from within VPC (for internal APIs)
+    alb.ingress.kubernetes.io/scheme: internet-facing
+
+    # ip mode = ALB sends traffic directly to pod IPs
+    # instance mode = ALB sends traffic to node port, then kube-proxy routes
+    # ip mode is faster and works better with our VPC CNI setup
+    alb.ingress.kubernetes.io/target-type: ip
+
+    # ALB uses this path to check if targets are healthy
+    # Our nginx serves "healthy" at /health — auth service also has /health
+    alb.ingress.kubernetes.io/healthcheck-path: /health
+
+    # Listen on HTTP port 80
+    # Production improvement: add HTTPS with ACM certificate
+    alb.ingress.kubernetes.io/listen-ports: '[{"HTTP":80}]'
+spec:
+  rules:
+  - http:
+      paths:
+      # Order matters: more specific paths must come before /
+      # ALB evaluates rules top to bottom
+
+      - path: /api/auth
+        pathType: Prefix
+        backend:
+          service:
+            name: {{ .Values.services.auth.name }}
+            port:
+              number: {{ .Values.services.auth.port }}
+
+      - path: /api/streaming
+        pathType: Prefix
+        backend:
+          service:
+            name: {{ .Values.services.streaming.name }}
+            port:
+              number: {{ .Values.services.streaming.port }}
+
+      - path: /api/admin
+        pathType: Prefix
+        backend:
+          service:
+            name: {{ .Values.services.admin.name }}
+            port:
+              number: {{ .Values.services.admin.port }}
+
+      - path: /api/chat
+        pathType: Prefix
+        backend:
+          service:
+            name: {{ .Values.services.chat.name }}
+            port:
+              number: {{ .Values.services.chat.port }}
+
+      # Catch-all — must be last
+      # Every request not matching above goes to frontend
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: {{ .Values.frontend.name }}
+            port:
+              number: {{ .Values.frontend.port }}

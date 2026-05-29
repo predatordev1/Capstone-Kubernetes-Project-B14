@@ -1,0 +1,87 @@
+# ServiceAccount — gives the healing controller a Kubernetes identity
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: healing-controller
+  namespace: default
+---
+# ClusterRole — defines WHAT the healing controller is allowed to do
+# Principle of least privilege: only the exact permissions needed
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: healing-controller
+rules:
+- apiGroups: [""]
+  resources: ["pods"]
+  verbs: ["get", "list", "watch", "delete"]
+  # get+list+watch = read pod state to detect problems
+  # delete = the healing action itself
+- apiGroups: ["apps"]
+  resources: ["deployments", "replicasets"]
+  verbs: ["get", "list", "watch"]
+  # read-only on deployments — we never modify them directly
+- apiGroups: [""]
+  resources: ["events"]
+  verbs: ["get", "list", "watch", "create", "patch"]
+  # create+patch = write Kubernetes events so healing actions
+  # show up in kubectl describe pod output
+---
+# ClusterRoleBinding — connects the ServiceAccount to the ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: healing-controller
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: healing-controller
+subjects:
+- kind: ServiceAccount
+  name: healing-controller
+  namespace: default
+---
+# Deployment — runs the healing controller as a pod
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.healingController.name }}
+  labels:
+    app: {{ .Values.healingController.name }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ .Values.healingController.name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.healingController.name }}
+    spec:
+      serviceAccountName: healing-controller
+      containers:
+      - name: controller
+        image: "{{ .Values.global.ecrRegistry }}/{{ .Values.healingController.image }}:{{ .Values.image.tag }}"
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        env:
+        - name: WATCH_NAMESPACE
+          value: "default"
+        - name: RESTART_THRESHOLD
+          value: {{ .Values.healingController.restartThreshold | quote }}
+        - name: COOLDOWN_SECONDS
+          value: {{ .Values.healingController.cooldownSeconds | quote }}
+        - name: HEALING_LOG
+          value: "/var/log/healing/actions.log"
+        resources:
+          requests:
+            memory: "64Mi"
+            cpu: "50m"
+          limits:
+            memory: "128Mi"
+            cpu: "100m"
+        volumeMounts:
+        - name: healing-logs
+          mountPath: /var/log/healing
+      volumes:
+      - name: healing-logs
+        emptyDir: {}

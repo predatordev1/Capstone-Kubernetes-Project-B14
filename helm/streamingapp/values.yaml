@@ -1,62 +1,45 @@
-# Global configuration
 global:
   awsRegion: us-west-1
   awsAccountId: "975050024946"
   ecrRegistry: 975050024946.dkr.ecr.us-west-1.amazonaws.com
 
-# Replica count for all services
 replicaCount: 2
 
-# Image configuration
 image:
   pullPolicy: Always
   tag: latest
 
-# MongoDB Atlas Configuration
-mongodb:
-  enabled: false  # Using MongoDB Atlas
-
-# Services Configuration
 services:
   auth:
     name: auth-service
     image: streamingapp-auth
     port: 3001
-    
   streaming:
     name: streaming-service
     image: streamingapp-streaming
     port: 3002
-    
   admin:
     name: admin-service
     image: streamingapp-admin
     port: 3003
-    
   chat:
     name: chat-service
     image: streamingapp-chat
     port: 3004
 
-# Frontend Configuration
 frontend:
   name: frontend
   image: streamingapp-frontend
   port: 80
-  serviceType: LoadBalancer
+  serviceType: ClusterIP
 
-# AWS S3 Bucket (non-sensitive)
+healingController:
+  name: healing-controller
+  image: streamingapp-healing-controller
+  restartThreshold: "3"
+  cooldownSeconds: "300"
+
 aws:
   s3Bucket: "streamingapp-videos-975050024946"
 
-# Client URLs (will be updated after Load Balancer)
 clientUrls: "http://localhost:3000"
-
-## Deployment Notes
-## After deploying the frontend service, Kubernetes will provision an AWS LoadBalancer.
-## Run `kubectl get svc frontend` to find the EXTERNAL-IP/DNS.
-## Update `clientUrls` in `values.yaml` or override with:
-## helm upgrade --install streamingapp ./helm/streamingapp \
-##  --namespace default \
-##  --values ./helm/streamingapp/values.yaml \
-##  --set clientUrls=http://<alb-dns>

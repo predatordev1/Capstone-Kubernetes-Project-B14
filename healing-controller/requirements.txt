@@ -1,0 +1,4 @@
+# kubernetes — official Python client for Kubernetes API
+# Version 29.x matches Kubernetes API version 1.29-1.32
+# It can communicate with our 1.32 cluster
+kubernetes==29.0.0

@@ -1,0 +1,34 @@
+# PodDisruptionBudget — guarantees minimum availability during:
+# - Node upgrades (kubectl drain)
+# - Cluster autoscaler scale-down
+# - Rolling deployments
+# minAvailable: 1 means at least 1 pod always running during disruption
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: auth-pdb
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: {{ .Values.services.auth.name }}
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: streaming-pdb
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: {{ .Values.services.streaming.name }}
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: frontend-pdb
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: {{ .Values.frontend.name }}

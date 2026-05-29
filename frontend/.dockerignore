@@ -1,5 +1,31 @@
+# Dependencies — never copy these, always install fresh
 node_modules
-build
 npm-debug.log
+
+# Build output — the build stage creates this fresh
+build
+
+# Environment files — NEVER include in Docker image
+# These contain API keys and secrets
+.env
+.env.local
+.env.development
+.env.production
+.env.*.local
+
+# Git files — not needed in image
+.git
+.gitignore
+.gitattributes
+
+# Editor files — not needed in image
+.vscode
+.idea
+.DS_Store
+
+# Logs — not needed in image
 *.log
 coverage
+
+# Documentation — not needed in image
+README.md

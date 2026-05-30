@@ -42,4 +42,6 @@ healingController:
 aws:
   s3Bucket: "streamingapp-videos-975050024946"
 
-clientUrls: "http://localhost:3000"
+# CORS allowed origin — must match the public-facing URL that browsers use
+# This is the nginx ingress ELB URL (set after nginx ingress controller is installed)
+clientUrls: "http://k8s-ingressn-ingressn-c9769de705-60586d08c9ac6f4d.elb.us-west-1.amazonaws.com"

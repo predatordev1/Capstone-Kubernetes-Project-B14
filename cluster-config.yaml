@@ -4,32 +4,48 @@ kind: ClusterConfig
 metadata:
   name: streamingapp-cluster-pp
   region: us-west-1
-  version: "1.29"
+  version: "1.32"
+
+# NOTE: This file documents the cluster AS BUILT.
+# The cluster already exists — do NOT re-run eksctl create cluster with this file.
+# Use it as reference if you ever need to recreate or to add node groups.
 
 availabilityZones:
   - us-west-1a
   - us-west-1c
 
+# OIDC provider — required for:
+#   - AWS Load Balancer Controller (pod-level IAM)
+#   - Cluster Autoscaler (pod-level IAM)
+# Enabled at cluster creation time via eksctl
+iam:
+  withOIDC: true
+
 managedNodeGroups:
-  - name: streamingapp-nodes
+  - name: workers
     instanceType: t3.medium
     desiredCapacity: 2
     minSize: 1
-    maxSize: 3
+    maxSize: 4
     volumeSize: 20
     volumeType: gp3
-    amiFamily: AmazonLinux2
+    # AL2 (AmazonLinux2) was deprecated November 2025 — use AL2023
+    amiFamily: AmazonLinux2023
     labels:
       role: worker
     tags:
       Project: StreamingApp_PP
       Environment: Production
+      # These ASG tags are required for Cluster Autoscaler to discover and manage this group
+      k8s.io/cluster-autoscaler/enabled: "true"
+      k8s.io/cluster-autoscaler/streamingapp-cluster-pp: "owned"
     iam:
       withAddonPolicies:
         imageBuilder: true
         ebs: true
         albIngress: true
         cloudWatch: true
+        autoScaler: true
 
 cloudWatch:
   clusterLogging:

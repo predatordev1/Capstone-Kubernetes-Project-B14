@@ -3,15 +3,23 @@ kind: Ingress
 metadata:
   name: streamingapp-ingress
   annotations:
-    alb.ingress.kubernetes.io/scheme: internet-facing
-    alb.ingress.kubernetes.io/target-type: ip
-    alb.ingress.kubernetes.io/healthcheck-path: /health
-    alb.ingress.kubernetes.io/listen-ports: '[{"HTTP":80}]'
+    # nginx ingress controller — NOT AWS ALB
+    # Installed via: helm install ingress-nginx ingress-nginx/ingress-nginx -n ingress-nginx
+    # External URL comes from the nginx controller's LoadBalancer service
+    nginx.ingress.kubernetes.io/proxy-body-size: "100m"
+    # Extended timeouts: video uploads take time; WebSocket (chat) needs persistent connection
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"
+    # Required for Socket.IO WebSocket upgrade on the /api/chat path
+    nginx.ingress.kubernetes.io/proxy-http-version: "1.1"
 spec:
-  ingressClassName: alb
+  ingressClassName: nginx
   rules:
   - http:
       paths:
+      # Specific /api/* paths evaluated before the catch-all /
+      # nginx uses longest-prefix match, so order matters
+
       - path: /api/auth
         pathType: Prefix
         backend:
@@ -19,6 +27,7 @@ spec:
             name: {{ .Values.services.auth.name }}
             port:
               number: {{ .Values.services.auth.port }}
+
       - path: /api/streaming
         pathType: Prefix
         backend:
@@ -26,6 +35,7 @@ spec:
             name: {{ .Values.services.streaming.name }}
             port:
               number: {{ .Values.services.streaming.port }}
+
       - path: /api/admin
         pathType: Prefix
         backend:
@@ -33,6 +43,7 @@ spec:
             name: {{ .Values.services.admin.name }}
             port:
               number: {{ .Values.services.admin.port }}
+
       - path: /api/chat
         pathType: Prefix
         backend:
@@ -40,6 +51,9 @@ spec:
             name: {{ .Values.services.chat.name }}
             port:
               number: {{ .Values.services.chat.port }}
+
+      # Catch-all: all non-API requests go to the React SPA
+      # nginx config inside the frontend container handles React Router with try_files
       - path: /
         pathType: Prefix
         backend:

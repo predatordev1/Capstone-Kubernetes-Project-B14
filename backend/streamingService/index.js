@@ -36,6 +36,7 @@ const healthRoutes = require('./routes/health.route');
 const streamingRoutes = require('./routes/streaming.route');
 
 app.use('/api/health', healthRoutes);
+app.use('/api/streaming/streaming', streamingRoutes);
 app.use('/api/streaming', streamingRoutes);
 
 // Error handling middleware

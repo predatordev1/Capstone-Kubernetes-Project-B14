@@ -9,6 +9,12 @@ image:
   pullPolicy: Always
   tag: latest
 
+imagePullSecrets:
+  - name: ecr-secret
+
+database:
+  replicas: 1
+
 services:
   auth:
     name: auth-service
@@ -44,4 +50,5 @@ aws:
 
 # CORS allowed origin — must match the public-facing URL that browsers use
 # This is the nginx ingress ELB URL (set after nginx ingress controller is installed)
-clientUrls: "http://k8s-ingressn-ingressn-c9769de705-60586d08c9ac6f4d.elb.us-west-1.amazonaws.com"
+clientUrls: "http://a8ec3f83d2c5c4542a32983b515c7e2e-1119343381.us-east-2.elb.amazonaws.com"
+

@@ -59,7 +59,8 @@ spec:
               name: app-config
               key: s3-bucket
         - name: STREAMING_PUBLIC_URL
-          value: "http://{{ .Values.services.streaming.name }}:{{ .Values.services.streaming.port }}"
+          #value: "http://{{ .Values.services.streaming.name }}:{{ .Values.services.streaming.port }}"
+          value: {{ .Values.streamingPublicUrl | quote }}
         resources:
           requests:
             memory: "256Mi"

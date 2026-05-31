@@ -52,6 +52,16 @@ spec:
             port:
               number: {{ .Values.services.chat.port }}
 
+      # Socket.IO WebSocket connections from the chat service
+      # Must appear before the catch-all / or nginx routes it to the frontend
+      - path: /socket.io
+        pathType: Prefix
+        backend:
+          service:
+            name: {{ .Values.services.chat.name }}
+            port:
+              number: {{ .Values.services.chat.port }}
+
       # Catch-all: all non-API requests go to the React SPA
       # nginx config inside the frontend container handles React Router with try_files
       - path: /

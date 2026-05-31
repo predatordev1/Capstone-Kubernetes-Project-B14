@@ -44,4 +44,8 @@ aws:
 
 # CORS allowed origin — must match the public-facing URL that browsers use
 # This is the nginx ingress ELB URL (set after nginx ingress controller is installed)
-clientUrls: "http://k8s-ingressn-ingressn-c9769de705-60586d08c9ac6f4d.elb.us-west-1.amazonaws.com"
+clientUrls: "http://k8s-ingressn-ingressn-553d92ca08-bd3b405987d606fd.elb.us-west-1.amazonaws.com"
+# Public URL for the streaming service — used by streaming service to build
+# thumbnail and video stream URLs returned to the browser.
+#Must be the external nginx URL, NOT the internal k8s service name.
+streamingPublicUrl: "http://k8s-ingressn-ingressn-553d92ca08-bd3b405987d606fd.elb.us-west-1.amazonaws.com"

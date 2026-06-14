@@ -1,0 +1,22 @@
+{{- if .Values.grafana.ingressEnabled }}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: grafana-ingress
+  namespace: monitoring
+  annotations:
+    # Strip /grafana prefix before forwarding to Grafana pod
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
+spec:
+  ingressClassName: nginx
+  rules:
+  - http:
+      paths:
+      - path: /grafana(/|$)(.*)
+        pathType: ImplementationSpecific
+        backend:
+          service:
+            name: monitoring-grafana
+            port:
+              number: 80
+{{- end }}

@@ -3,23 +3,16 @@ kind: Ingress
 metadata:
   name: streamingapp-ingress
   annotations:
-    # nginx ingress controller — NOT AWS ALB
-    # Installed via: helm install ingress-nginx ingress-nginx/ingress-nginx -n ingress-nginx
-    # External URL comes from the nginx controller's LoadBalancer service
     nginx.ingress.kubernetes.io/proxy-body-size: "100m"
-    # Extended timeouts: video uploads take time; WebSocket (chat) needs persistent connection
     nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
     nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"
-    # Required for Socket.IO WebSocket upgrade on the /api/chat path
+    # Required for Socket.IO WebSocket upgrade handshake
     nginx.ingress.kubernetes.io/proxy-http-version: "1.1"
 spec:
   ingressClassName: nginx
   rules:
   - http:
       paths:
-      # Specific /api/* paths evaluated before the catch-all /
-      # nginx uses longest-prefix match, so order matters
-
       - path: /api/auth
         pathType: Prefix
         backend:
@@ -52,8 +45,7 @@ spec:
             port:
               number: {{ .Values.services.chat.port }}
 
-      # Socket.IO WebSocket connections from the chat service
-      # Must appear before the catch-all / or nginx routes it to the frontend
+      # Socket.IO WebSocket connections — must appear before / catch-all
       - path: /socket.io
         pathType: Prefix
         backend:
@@ -63,7 +55,6 @@ spec:
               number: {{ .Values.services.chat.port }}
 
       # Catch-all: all non-API requests go to the React SPA
-      # nginx config inside the frontend container handles React Router with try_files
       - path: /
         pathType: Prefix
         backend:

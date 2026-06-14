@@ -1,0 +1,70 @@
+apiVersion: monitoring.coreos.com/v1alpha1
+kind: AlertmanagerConfig
+metadata:
+  name: streamingapp-alerts
+  namespace: monitoring
+  labels:
+    alertmanagerConfig: streamingapp
+spec:
+  route:
+    groupBy: ['alertname', 'namespace', 'pod']
+    groupWait: 30s
+    groupInterval: 5m
+    repeatInterval: 3h
+    receiver: slack-critical
+    routes:
+    - matchers:
+      - name: severity
+        value: critical
+      receiver: slack-critical
+    - matchers:
+      - name: severity
+        value: warning
+      receiver: slack-warning
+
+  receivers:
+  - name: slack-critical
+    slackConfigs:
+    - apiURL:
+        name: alertmanager-slack
+        key: slack-webhook-url
+      channel: '#k8s-alerts'
+      sendResolved: true
+      iconEmoji: ':red_circle:'
+      title: '[{{ .Status | toUpper }}{{ if eq .Status "firing" }}:{{ .Alerts.Firing | len }}{{ end }}] {{ .CommonLabels.alertname }}'
+      text: |
+        {{ range .Alerts }}
+        *Alert:* {{ .Labels.alertname }} - `{{ .Labels.severity }}`
+        *Pod:* {{ .Labels.pod }}
+        *Namespace:* {{ .Labels.namespace }}
+        *Summary:* {{ .Annotations.summary }}
+        *Started:* {{ .StartsAt | since }}
+        {{ end }}
+
+  - name: slack-warning
+    slackConfigs:
+    - apiURL:
+        name: alertmanager-slack
+        key: slack-webhook-url
+      channel: '#k8s-warnings'
+      sendResolved: true
+      iconEmoji: ':warning:'
+      title: '[{{ .Status | toUpper }}] {{ .CommonLabels.alertname }}'
+      text: |
+        {{ range .Alerts }}
+        *Alert:* {{ .Labels.alertname }}
+        *Summary:* {{ .Annotations.summary }}
+        {{ end }}
+
+---
+# Create the Slack webhook secret before applying this file:
+#
+#   kubectl create secret generic alertmanager-slack \
+#     --from-literal=slack-webhook-url="https://hooks.slack.com/services/YOUR/WEBHOOK/URL" \
+#     --namespace monitoring
+#
+# Then apply:
+#   kubectl apply -f alertmanager-config.yaml
+#
+# Verify Alertmanager picked it up:
+#   kubectl get alertmanagerconfig -n monitoring

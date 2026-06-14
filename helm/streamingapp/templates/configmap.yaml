@@ -6,3 +6,4 @@ data:
   aws-region: {{ .Values.global.awsRegion | quote }}
   s3-bucket: {{ .Values.aws.s3Bucket | quote }}
   client-urls: {{ .Values.clientUrls | quote }}
+  streaming-public-url: {{ .Values.streamingPublicUrl | quote }}

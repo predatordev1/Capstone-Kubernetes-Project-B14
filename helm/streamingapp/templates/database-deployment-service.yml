@@ -1,0 +1,47 @@
+{{- if .Values.database.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: database-deployment
+spec:
+  replicas: {{ .Values.database.replicas }}
+  selector:
+    matchLabels:
+      component: database
+  template:
+    metadata:
+      labels:
+        component: database
+    spec:
+      containers:
+        - name: database
+          image: mongo:6
+          ports:
+            - containerPort: 27017
+          volumeMounts:
+            - name: database-persistent-storage
+              mountPath: /data/db
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "250m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
+      volumes:
+        - name: database-persistent-storage
+          persistentVolumeClaim:
+            claimName: database-persistent-volume-claim
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: database-service
+spec:
+  type: ClusterIP
+  selector:
+    component: database
+  ports:
+    - port: 27017
+      targetPort: 27017
+{{- end }}

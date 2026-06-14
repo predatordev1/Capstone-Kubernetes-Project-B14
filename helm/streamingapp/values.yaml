@@ -9,6 +9,9 @@ image:
   pullPolicy: Always
   tag: latest
 
+imagePullSecrets:
+  - name: ecr-secret
+
 services:
   auth:
     name: auth-service
@@ -45,7 +48,18 @@ aws:
 # CORS allowed origin — must match the public-facing URL that browsers use
 # This is the nginx ingress ELB URL (set after nginx ingress controller is installed)
 clientUrls: "http://k8s-ingressn-ingressn-553d92ca08-bd3b405987d606fd.elb.us-west-1.amazonaws.com"
-# Public URL for the streaming service — used by streaming service to build
-# thumbnail and video stream URLs returned to the browser.
-#Must be the external nginx URL, NOT the internal k8s service name.
+
+# Public URL for the streaming service — used to build thumbnail and video stream
+# URLs returned to the browser. Must be the external nginx URL, not internal k8s DNS.
 streamingPublicUrl: "http://k8s-ingressn-ingressn-553d92ca08-bd3b405987d606fd.elb.us-west-1.amazonaws.com"
+
+# Set to true only for local single-node development; Atlas is used in production
+database:
+  enabled: false
+  replicas: 1
+
+# Set ingressEnabled: true after running the Grafana sub-path Helm upgrade
+# described in the README. Grafana must be configured with serve_from_sub_path=true
+# before enabling this, or redirects will break.
+grafana:
+  ingressEnabled: false
